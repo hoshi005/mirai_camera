@@ -12,7 +12,7 @@ struct ContentView: View {
     
     @StateObject private var cameraManager = CameraManager()
     @State private var isSpeaking = false
-    @State private var audioPlayer: AVAudioPlayer?
+    @State private var audioPlayers: [String: AVAudioPlayer] = [:] // 音声ファイルを保持する辞書型
     
     var body: some View {
         ZStack {
@@ -47,9 +47,9 @@ struct ContentView: View {
                         speakText(detectedText)
                     }
                 } label: {
-                    Text("読み上げ")
+                    Text("未来衣ちゃんが読み上げるぞ！")
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.accentColor)
                         .foregroundStyle(.white)
                         .cornerRadius(8.0)
                 }
@@ -59,49 +59,47 @@ struct ContentView: View {
         }
         .onAppear {
             cameraManager.startSession()
+            preloadAudioFiles() // 画面が表示されたタイミングで音声ファイルをロード
         }
         .onDisappear {
             cameraManager.stopSession()
         }
     }
     
-    private func speakText(_ text: String) {
-        isSpeaking = true
-        let audioFiles = text.map { "\($0).mp3" } // 各文字に対応する音声ファイル名
-        
-        playAudioFilesSequentially(audioFiles) {
-            isSpeaking = false // 再生完了後にボタンを有効化
+    private func preloadAudioFiles() {
+        let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".lowercased()
+        for char in characters {
+            let fileName = "\(char).mp3"
+            if let url = Bundle.main.url(forResource: fileName, withExtension: nil) {
+                do {
+                    let player = try AVAudioPlayer(contentsOf: url)
+                    player.prepareToPlay() // 再生準備を行う
+                    audioPlayers[String(char)] = player
+                } catch {
+                    print("音声ファイルのロードに失敗しました: \(fileName), \(error)")
+                }
+            } else {
+                print("音声ファイルが見つかりません: \(fileName)")
+            }
         }
     }
     
-    private func playAudioFilesSequentially(_ files: [String], completion: @escaping () -> Void) {
-        // 再生キュー処理
+    private func speakText(_ text: String) {
+        isSpeaking = true
         DispatchQueue.global(qos: .userInitiated).async {
-            for file in files {
-                guard let url = Bundle.main.url(forResource: file, withExtension: nil) else {
-                    print("音声ファイルが見つかりません: \(file)")
-                    continue
-                }
-                
-                // メインスレッドで再生処理を実行
-                DispatchQueue.main.sync {
-                    do {
-                        self.audioPlayer = try AVAudioPlayer(contentsOf: url)
-                        self.audioPlayer?.play()
-                    } catch {
-                        print("音声ファイルの再生に失敗しました: \(error)")
+            for char in text {
+                if let player = audioPlayers[String(char)] {
+                    DispatchQueue.main.sync {
+                        player.play()
+                    }
+                    // 再生が完了するまで待機
+                    while player.isPlaying {
+                        usleep(1_000) // 0.05秒待機
                     }
                 }
-                
-                // 再生が完了するまで待機
-                while self.audioPlayer?.isPlaying == true {
-                    usleep(1_000) // 0.001秒待機
-                }
             }
-            
-            // 再生が完了したらコールバックを呼び出す
             DispatchQueue.main.async {
-                completion()
+                isSpeaking = false // 再生完了後にボタンを有効化
             }
         }
     }
