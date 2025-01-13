@@ -95,7 +95,7 @@ struct ContentView: View {
                 
                 // 再生が完了するまで待機
                 while self.audioPlayer?.isPlaying == true {
-                    usleep(100_000) // 0.1秒待機
+                    usleep(1_000) // 0.001秒待機
                 }
             }
             
