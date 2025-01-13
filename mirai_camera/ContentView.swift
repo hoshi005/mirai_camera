@@ -12,8 +12,7 @@ struct ContentView: View {
     
     @StateObject private var cameraManager = CameraManager()
     @State private var isSpeaking = false
-    @State private var audioPlayer: AVAudioPlayer? // AVAudioPlayerのインスタンスを保持
-
+    @State private var audioPlayer: AVAudioPlayer?
     
     var body: some View {
         ZStack {
@@ -27,7 +26,7 @@ struct ContentView: View {
                     .stroke(Color.green, lineWidth: 4.0)
                     .cornerRadius(2.0)
                     .frame(width: rect.width, height: rect.height)
-                    .position(x:rect.midX, y: rect.midY)
+                    .position(x: rect.midX, y: rect.midY)
             }
             
             VStack {
@@ -70,32 +69,40 @@ struct ContentView: View {
         isSpeaking = true
         let audioFiles = text.map { "\($0).mp3" } // 各文字に対応する音声ファイル名
         
-        // 非同期で再生処理を行う
+        playAudioFilesSequentially(audioFiles) {
+            isSpeaking = false // 再生完了後にボタンを有効化
+        }
+    }
+    
+    private func playAudioFilesSequentially(_ files: [String], completion: @escaping () -> Void) {
+        // 再生キュー処理
         DispatchQueue.global(qos: .userInitiated).async {
-            for file in audioFiles {
-                if let url = Bundle.main.url(forResource: file, withExtension: nil) {
-                    DispatchQueue.main.async {
-                        do {
-                            self.audioPlayer = try AVAudioPlayer(contentsOf: url)
-                            self.audioPlayer?.play()
-                        } catch {
-                            print("音声ファイルの再生に失敗しました: \(error)")
-                        }
+            for file in files {
+                guard let url = Bundle.main.url(forResource: file, withExtension: nil) else {
+                    print("音声ファイルが見つかりません: \(file)")
+                    continue
+                }
+                
+                // メインスレッドで再生処理を実行
+                DispatchQueue.main.sync {
+                    do {
+                        self.audioPlayer = try AVAudioPlayer(contentsOf: url)
+                        self.audioPlayer?.play()
+                    } catch {
+                        print("音声ファイルの再生に失敗しました: \(error)")
                     }
-                    // 再生が完了するまで待機
-                    while self.audioPlayer?.isPlaying == true {
-                        usleep(100_000) // 0.1秒待機
-                    }
+                }
+                
+                // 再生が完了するまで待機
+                while self.audioPlayer?.isPlaying == true {
+                    usleep(100_000) // 0.1秒待機
                 }
             }
             
+            // 再生が完了したらコールバックを呼び出す
             DispatchQueue.main.async {
-                self.isSpeaking = false
+                completion()
             }
         }
     }
-}
-
-#Preview {
-    ContentView()
 }
