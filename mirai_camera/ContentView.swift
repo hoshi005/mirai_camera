@@ -44,7 +44,7 @@ struct ContentView: View {
                 // 読み上げボタン.
                 Button {
                     if let detectedText = cameraManager.detectedText {
-                        speakText(detectedText)
+                        speakText(detectedText.lowercased())
                     }
                 } label: {
                     Text("未来衣ちゃんが読み上げるぞ！")
