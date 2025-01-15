@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "DEBEED41-E5DF-40F1-90B3-EC2E5BA531EF.heic",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
