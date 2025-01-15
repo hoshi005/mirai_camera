@@ -22,24 +22,17 @@ struct ContentView: View {
             
             // 検出された矩形をオーバーレイ.
             if let rect = cameraManager.detectedRect {
-                Rectangle()
-                    .stroke(Color.green, lineWidth: 4.0)
-                    .cornerRadius(2.0)
-                    .frame(width: rect.width, height: rect.height)
-                    .position(x: rect.midX, y: rect.midY)
+                let expandedRect = rect.insetBy(dx: -10, dy: -10) // 矩形を拡張
+                
+                OverlayRect(
+                    rect: expandedRect,
+                    borderColor: .accentColor,
+                    fillColor: .accentColor.opacity(0.3)
+                )
             }
             
             VStack {
                 Spacer()
-                
-                // 検出結果の表示.
-                if let detectedText = cameraManager.detectedText {
-                    Text("検出された文字列: \(detectedText)")
-                        .padding()
-                        .background(Color.black.opacity(0.7))
-                        .foregroundStyle(.white)
-                        .cornerRadius(8.0)
-                }
                 
                 // 読み上げボタン.
                 Button {
@@ -47,11 +40,10 @@ struct ContentView: View {
                         speakText(detectedText.lowercased())
                     }
                 } label: {
-                    Text("未来衣ちゃんが読み上げるぞ！")
-                        .padding()
-                        .background(Color.accentColor)
-                        .foregroundStyle(.white)
-                        .cornerRadius(8.0)
+                    Image("mirai001")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 200)
                 }
                 .padding()
                 .disabled(isSpeaking)
@@ -64,6 +56,7 @@ struct ContentView: View {
         .onDisappear {
             cameraManager.stopSession()
         }
+        .ignoresSafeArea()
     }
     
     private func preloadAudioFiles() {

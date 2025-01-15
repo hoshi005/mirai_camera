@@ -96,7 +96,8 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
                     // 水平方向の反転を補正
                     let mirroredRect = CGRect(
                         x: previewLayer.bounds.width - convertedRect.maxX,
-                        y: convertedRect.origin.y - 44,
+                        y: convertedRect.origin.y,
+//                        y: convertedRect.origin.y - 44,
                         width: convertedRect.width,
                         height: convertedRect.height
                     )
