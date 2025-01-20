@@ -87,7 +87,7 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
             guard let candidate = observation.topCandidates(1).first?.string else { continue }
             let filteredText = candidate.filter { $0.isLetter || $0.isNumber }
             
-            if filteredText.count == 10, let previewLayer = self.previewLayer {
+            if filteredText.count == 10 || filteredText.count == 12, let previewLayer = self.previewLayer {
                 DispatchQueue.main.async {
                     // 正規化された座標を変換
                     let boundingBox = observation.boundingBox

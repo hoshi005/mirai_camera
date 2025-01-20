@@ -34,19 +34,23 @@ struct ContentView: View {
             VStack {
                 Spacer()
                 
-                // 読み上げボタン.
-                Button {
-                    if let detectedText = cameraManager.detectedText {
-                        speakText(detectedText.lowercased())
+                HStack {
+                    // 読み上げボタン.
+                    Button {
+                        if let detectedText = cameraManager.detectedText {
+                            speakText(detectedText.lowercased())
+                        }
+                    } label: {
+                        Image("0")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 200)
                     }
-                } label: {
-                    Image("mirai001")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 200)
+                    .padding()
+                    .disabled(isSpeaking)
+                    
+                    Spacer()
                 }
-                .padding()
-                .disabled(isSpeaking)
             }
         }
         .onAppear {
