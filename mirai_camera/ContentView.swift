@@ -13,7 +13,8 @@ struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
     @State private var isSpeaking = false
     @State private var audioPlayers: [String: AVAudioPlayer] = [:] // 音声ファイルを保持する辞書型
-    
+    @State private var currentCharacter: String = "mirai003"
+
     var body: some View {
         ZStack {
             // カメラ映像を背景に表示.
@@ -41,7 +42,7 @@ struct ContentView: View {
                             speakText(detectedText.lowercased())
                         }
                     } label: {
-                        Image("0")
+                        Image(currentCharacter)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 200)
@@ -87,6 +88,7 @@ struct ContentView: View {
             for char in text {
                 if let player = audioPlayers[String(char)] {
                     DispatchQueue.main.sync {
+                        currentCharacter = String(char)
                         player.play()
                     }
                     // 再生が完了するまで待機
@@ -97,6 +99,7 @@ struct ContentView: View {
             }
             DispatchQueue.main.async {
                 isSpeaking = false // 再生完了後にボタンを有効化
+                currentCharacter = "mirai003"
             }
         }
     }
