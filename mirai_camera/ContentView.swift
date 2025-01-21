@@ -13,7 +13,7 @@ struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
     @State private var isSpeaking = false
     @State private var audioPlayers: [String: AVAudioPlayer] = [:] // 音声ファイルを保持する辞書型
-    @State private var currentCharacter: String = "mirai003"
+    @State private var currentCharacter: String = "mirai001"
 
     var body: some View {
         ZStack {
@@ -47,7 +47,6 @@ struct ContentView: View {
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 200)
                     }
-                    .padding()
                     .disabled(isSpeaking)
                     
                     Spacer()
@@ -57,6 +56,9 @@ struct ContentView: View {
         .onAppear {
             cameraManager.startSession()
             preloadAudioFiles() // 画面が表示されたタイミングで音声ファイルをロード
+            
+            // 初期値をランダムに設定
+            currentCharacter = generateRandomCharacterImage()
         }
         .onDisappear {
             cameraManager.stopSession()
@@ -99,8 +101,14 @@ struct ContentView: View {
             }
             DispatchQueue.main.async {
                 isSpeaking = false // 再生完了後にボタンを有効化
-                currentCharacter = "mirai003"
+                currentCharacter = generateRandomCharacterImage() // ランダムなデフォルト画像に設定
             }
         }
+    }
+    
+    /// ランダムな画像名を生成する関数
+    private func generateRandomCharacterImage() -> String {
+        let randomIndex = Int.random(in: 1...4) // 1〜4のランダム値
+        return String(format: "mirai%03d", randomIndex) // 3桁ゼロ埋め
     }
 }
