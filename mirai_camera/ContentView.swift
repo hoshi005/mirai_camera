@@ -108,7 +108,7 @@ struct ContentView: View {
     
     /// ランダムな画像名を生成する関数
     private func generateRandomCharacterImage() -> String {
-        let randomIndex = Int.random(in: 1...4) // 1〜4のランダム値
+        let randomIndex = Int.random(in: 1...7) // 1〜4のランダム値
         return String(format: "mirai%03d", randomIndex) // 3桁ゼロ埋め
     }
 }
