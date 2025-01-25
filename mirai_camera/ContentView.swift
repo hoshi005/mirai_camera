@@ -41,7 +41,7 @@ struct ContentView: View {
                     // 読み上げボタン.
                     Button {
                         if let detectedText = cameraManager.detectedText {
-                            speakText(detectedText.lowercased())
+                            speakText(detectedText)
                         }
                     } label: {
                         Image(currentCharacter)
@@ -97,9 +97,9 @@ struct ContentView: View {
         isSpeaking = true
         DispatchQueue.global(qos: .userInitiated).async {
             for char in text {
-                if let player = audioPlayers[String(char)] {
+                if let player = audioPlayers[String(char.lowercased())] {
                     DispatchQueue.main.sync {
-                        currentCharacter = String(char) // 読み上げ中の文字
+                        currentCharacter = String(char.lowercased()) // 読み上げ中の文字
                         displayedText = String(char) // 吹き出しに表示
                         player.play()
                     }
