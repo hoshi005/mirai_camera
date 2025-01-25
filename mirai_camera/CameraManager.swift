@@ -18,6 +18,17 @@ class CameraManager: NSObject, ObservableObject {
     private let queue = DispatchQueue(label: "mirai_camera.queue")
     private let textRecognitionRequest = VNRecognizeTextRequest()
     
+    // ホワイトリスト（許可する文字列）
+    private let whitelist: [String] = [
+        "5g3dwf9yrtwk",
+        "5g2zkuukucws",
+        "6pef947898",
+        "59m4d3e594",
+        "fvs7647587",
+        "happybirthday",
+        "hey",
+    ]
+    
     override init() {
         super.init()
         setupCamera()
@@ -87,7 +98,11 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
             guard let candidate = observation.topCandidates(1).first?.string else { continue }
             let filteredText = candidate.filter { $0.isLetter || $0.isNumber }
             
-            if filteredText.count == 10 || filteredText.count == 12, let previewLayer = self.previewLayer {
+            // ホワイトリストとの比較（大文字小文字を区別しない）
+            let lowercasedWhitelist = whitelist.map { $0.lowercased() } // ホワイトリストを小文字に変換
+            let lowercasedText = filteredText.lowercased() // OCR結果も小文字に変換
+            
+            if lowercasedWhitelist.contains(lowercasedText), let previewLayer = self.previewLayer {
                 DispatchQueue.main.async {
                     // 正規化された座標を変換
                     let boundingBox = observation.boundingBox
@@ -97,7 +112,6 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
                     let mirroredRect = CGRect(
                         x: previewLayer.bounds.width - convertedRect.maxX,
                         y: convertedRect.origin.y,
-//                        y: convertedRect.origin.y - 44,
                         width: convertedRect.width,
                         height: convertedRect.height
                     )
