@@ -13,7 +13,7 @@ struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
     @State private var isSpeaking = false
     @State private var audioPlayers: [String: AVAudioPlayer] = [:] // 音声ファイルを保持する辞書型
-    @State private var currentCharacter: String = "mirai001"
+    @State private var currentCharacter: String = "mirai000"
 
     var body: some View {
         ZStack {
@@ -108,7 +108,7 @@ struct ContentView: View {
     
     /// ランダムな画像名を生成する関数
     private func generateRandomCharacterImage() -> String {
-        let randomIndex = Int.random(in: 1...7) // 1〜4のランダム値
-        return String(format: "mirai%03d", randomIndex) // 3桁ゼロ埋め
+        let randomIndex = Int.random(in: 0...7)
+        return String(format: "mirai%03d", randomIndex)
     }
 }
