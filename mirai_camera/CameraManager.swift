@@ -94,15 +94,18 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     private func processTextObservations(_ observations: [VNRecognizedTextObservation]) {
+        var isMatchFound = false // ホワイトリストに一致したかを追跡
+
         for observation in observations {
             guard let candidate = observation.topCandidates(1).first?.string else { continue }
             let filteredText = candidate.filter { $0.isLetter || $0.isNumber }
             
             // ホワイトリストとの比較（大文字小文字を区別しない）
-            let lowercasedWhitelist = whitelist.map { $0.lowercased() } // ホワイトリストを小文字に変換
-            let lowercasedText = filteredText.lowercased() // OCR結果も小文字に変換
+            let lowercasedWhitelist = whitelist.map { $0.lowercased() }
+            let lowercasedText = filteredText.lowercased()
             
             if lowercasedWhitelist.contains(lowercasedText), let previewLayer = self.previewLayer {
+                isMatchFound = true // 一致が見つかった場合にフラグを設定
                 DispatchQueue.main.async {
                     // 正規化された座標を変換
                     let boundingBox = observation.boundingBox
@@ -120,6 +123,14 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
                     self.detectedRect = mirroredRect
                 }
                 break
+            }
+        }
+        
+        // 一致する文字列が見つからなかった場合、矩形と文字列をクリア
+        if !isMatchFound {
+            DispatchQueue.main.async {
+                self.detectedText = nil
+                self.detectedRect = nil
             }
         }
     }
