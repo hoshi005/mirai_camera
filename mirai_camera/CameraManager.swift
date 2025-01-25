@@ -27,6 +27,8 @@ class CameraManager: NSObject, ObservableObject {
         "fvs7647587",
         "happybirthday",
         "hey",
+        "01.25",
+        "0125",
     ]
     
     override init() {
