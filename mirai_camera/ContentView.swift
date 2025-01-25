@@ -14,6 +14,8 @@ struct ContentView: View {
     @State private var isSpeaking = false
     @State private var audioPlayers: [String: AVAudioPlayer] = [:] // 音声ファイルを保持する辞書型
     @State private var currentCharacter: String = "mirai000"
+    @State private var displayedText: String? = nil // 吹き出しに表示するテキスト
+
 
     var body: some View {
         ZStack {
@@ -35,7 +37,7 @@ struct ContentView: View {
             VStack {
                 Spacer()
                 
-                HStack {
+                HStack(alignment: .top) {
                     // 読み上げボタン.
                     Button {
                         if let detectedText = cameraManager.detectedText {
@@ -48,6 +50,13 @@ struct ContentView: View {
                             .frame(width: 200)
                     }
                     .disabled(isSpeaking)
+                    
+                    // 吹き出し表示
+                    if let displayedText = displayedText {
+                        SpeechBubble(text: displayedText)
+                            .frame(width: 100, height: 100) // 吹き出しのサイズを設定
+                            .padding()
+                    }
                     
                     Spacer()
                 }
@@ -90,12 +99,17 @@ struct ContentView: View {
             for char in text {
                 if let player = audioPlayers[String(char)] {
                     DispatchQueue.main.sync {
-                        currentCharacter = String(char)
+                        currentCharacter = String(char) // 読み上げ中の文字
+                        displayedText = String(char) // 吹き出しに表示
                         player.play()
                     }
                     // 再生が完了するまで待機
                     while player.isPlaying {
                         usleep(1_000) // 0.05秒待機
+                    }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        displayedText = nil // 吹き出しを非表示に
                     }
                 }
             }
@@ -111,4 +125,10 @@ struct ContentView: View {
         let randomIndex = Int.random(in: 0...7)
         return String(format: "mirai%03d", randomIndex)
     }
+}
+
+
+
+#Preview {
+    ContentView()
 }
